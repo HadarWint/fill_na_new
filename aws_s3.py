@@ -134,7 +134,7 @@ class AwsS3:
     def plot_kpi_columns_s3(self, date, i, pdf, synthesized_df):
         fig = msno.matrix(synthesized_df[self.kpi_columns], freq='H', figsize=(15, 10), fontsize=4, sparkline=False,
                           p=1)
-        if synthesized_df.shape[0] <= 86400:
+        if synthesized_df.shape[0] <= 86500:
             fig.set_yticklabels(np.arange(0, 24))
         else:
             fig.set_yticklabels(np.arange(0, 25))
@@ -144,10 +144,11 @@ class AwsS3:
                        f'in flow meters')
         pdf.savefig()
 
+
     def plot_all_columns(self, date, i, pdf, synthesized_df):
         fig = msno.matrix(synthesized_df, freq='H', figsize=(15, 10), fontsize=4,
                           sparkline=False, p=1)
-        if synthesized_df.shape[0] <= 86400:
+        if synthesized_df.shape[0] <= 86500:
             fig.set_yticklabels(np.arange(0, 24))
         else:
             fig.set_yticklabels(np.arange(0, 25))
@@ -156,7 +157,6 @@ class AwsS3:
                        f', {synthesized_df[self.kpi_continous].isna().sum().sum()} in flow meters '
                        f'and {synthesized_df.isna().sum().sum()} total')
         pdf.savefig()
-        return pdf
 
     def save_pdf_on_s3(self):
         df = self.df_to_s3.copy()

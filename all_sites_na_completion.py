@@ -14,7 +14,7 @@ import re
 import time
 
 class ES_to_S3:
-    def __init__(self, site, start, end, data_repo, config, offline=False):
+    def __init__(self, site, start, end, data_repo, config, save_onto_s3,save_locally_to_pc,offline=False):
         self.site_txt = site
         self.data_repo = os.path.join(str(path.home()), data_repo)
         self.config = config
@@ -25,13 +25,14 @@ class ES_to_S3:
         self.es_index_pattern = config['es_connection']['es_index_pattern']
         self.time_categorical = config['pre_p']['time_hold_categorical']
         if 'pc' in self.site_txt:
-            self.unneeded_columns_es = config['general']['unneeded_columns_es']
+            if 'pc' in self.site_txt:
+                self.unneeded_columns_es = config['general']['unneeded_columns_es']
             self.feature_date_name_col = config['general']['feature_date_name_col']
             self.datetime_feature_name = self.feature_date_name_col
             self.production_line = config['es_connection']['es_production_line']
             self.low_level = False
             self.site = config['general']['production_line']
-            self.time_categorical = config['pre_p']['time_hold_categorial']
+            self.time_categorical = config['pre_p']['time_hold_categorical']
             self.product_name = None
             self.local_date_name_col = config['general']['local_date_name_col']
         if 'tc' in self.site_txt:
@@ -63,9 +64,11 @@ class ES_to_S3:
         self.max_seconds = config['pre_p']['max_seconds_na']
         self.bucket_name = config['s3']['op_bucket']
         # self.interpolation_methods = ['ffill','linear','SMM','spline']
-        self.s3 = True
+        if save_onto_s3:
+            self.s3 = True
         self.save_raw_files_locally = False
-        self.save_locally_from_s3 = True
+        if save_locally_to_pc:
+            self.save_locally_from_s3 = True
 
     def remove_unneeded_columns_from_df(self, df):
         """
@@ -456,7 +459,7 @@ class ES_to_S3:
             df.to_csv(final_path)
             print('data is saved successfully')
 
-    def main(self):
+    def run(self):
         invalid_files = pd.DataFrame([])
         df = self.get_data()
         if df.shape[0] > 86401:
@@ -498,7 +501,7 @@ class ES_to_S3:
 if __name__ == '__main__':
     start_date = ['2022-12-02']
     # list_of_sites = ['tarsus_tc1500_line2']
-    list_of_sites = ['veurne_tc300_line11', 'murcia_cip_gea', 'murcia_cip_tetra',
+    list_of_sites = ['tarsus_tc1500_line2','veurne_tc300_line11', 'murcia_cip_gea', 'murcia_cip_tetra',
                      'tarsus_pc50mz_line1', 'veurne_lopc21_line1', 'veurne_pc42_line4', 'veurne_pc50_line3',
                      'zb_cip_blending', 'zb_cip_tankfarm']
     starts = start_date * len(list_of_sites)
@@ -512,9 +515,9 @@ if __name__ == '__main__':
         config_dict = io_utils.parse_config_dictionary_file(config_fp)
         dates = pd.date_range(starts[j], end_date, freq='d')
         for d in dates:
-            es_s3 = ES_to_S3(site, d, d + timedelta(seconds=86400 - 1), 'data_repo//tc_ml_pipeline', config_dict, True)
+            es_s3 = ES_to_S3(site, d, d + timedelta(seconds=86400 - 1), 'data_repo//tc_ml_pipeline', config_dict, True, True, True)
             try:
-                null_statistics, invalid_input = es_s3.main()
+                null_statistics, invalid_input = es_s3.run()
                 tot_nulls_before_after = pd.concat([tot_nulls_before_after, null_statistics])
                 invalid_files_days = pd.concat([invalid_files_days, invalid_input])
             except Exception as ex:
