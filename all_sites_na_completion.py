@@ -267,7 +267,8 @@ class ES_to_S3:
                 gr['count'] <= float(self.max_seconds[0]))
         gr['to_replace'] = gr[col]
         gr.loc[gr['replace'], 'to_replace'] = gr.loc[gr['replace'], 'shift_prev']
-        gr.loc[gr['to_replace'].isna(), 'to_replace'] = gr.loc[gr['replace'], 'shift_prev']
+        if gr[gr['to_replace'].isna().eq(1)].shape[0] > 0:
+            gr.loc[gr['to_replace'].isna(), 'to_replace'] = gr.loc[gr['replace'], 'shift_prev']
         non_flow_meter_completion_set.update(list(data2[data2.gr.isin(list(gr.loc[gr['replace'] == True].index))].index))
         data2 = data2.join(gr['to_replace'], on='gr')
         data2['to_replace'].ffill(inplace=True)
