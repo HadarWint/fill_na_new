@@ -498,36 +498,36 @@ class ES_to_S3:
         return null_kpi_count_statistics, invalid_files
 
 
-if __name__ == '__main__':
-    start_date = ['2022-12-02']
-    # list_of_sites = ['tarsus_tc1500_line2']
-    list_of_sites = ['tarsus_tc1500_line2','veurne_tc300_line11', 'murcia_cip_gea', 'murcia_cip_tetra',
-                     'tarsus_pc50mz_line1', 'veurne_lopc21_line1', 'veurne_pc42_line4', 'veurne_pc50_line3',
-                     'zb_cip_blending', 'zb_cip_tankfarm']
-    starts = start_date * len(list_of_sites)
-    data_repo = r'C:\Users\HadarHolan\data_repo'
-    tot_nulls_before_after = pd.DataFrame([])
-    invalid_files_days = pd.DataFrame([])
-    end_date = '2022-12-02'
-    for j, site in enumerate(list_of_sites):
-        config_fp = f'C:\\Users\\hadarh\\OneDrive - Aqua Rimat\\Documents\\PycharmProjects\\tc_ml_pipeline\\' \
-                    f'site_and_email_config_files\\{site}_config.txt'
-        config_dict = io_utils.parse_config_dictionary_file(config_fp)
-        dates = pd.date_range(starts[j], end_date, freq='d')
-        for d in dates:
-            es_s3 = ES_to_S3(site, d, d + timedelta(seconds=86400 - 1), 'data_repo//tc_ml_pipeline', config_dict, True, True, True)
-            try:
-                null_statistics, invalid_input = es_s3.run()
-                tot_nulls_before_after = pd.concat([tot_nulls_before_after, null_statistics])
-                invalid_files_days = pd.concat([invalid_files_days, invalid_input])
-            except Exception as ex:
-                print(f'Day {d} was not ingested. Error is: {ex}')
-
-    deployment_config_path = f'C:\\Users\\hadarh\\OneDrive - Aqua Rimat\\Documents\\PycharmProjects\\' \
-                             f'tc_ml_pipeline\\tc-predictor-service\\deploy_config.txt'
-    config_deploy = io_utils.parse_config_dictionary_file(deployment_config_path)
-    topic = 'null report per site before and after'
-    ending = datetime.strptime(end_date, "%Y-%m-%d").date()
-    email_service = EMailService(config_deploy['email']['sender'], config_deploy['email']['recipients'], topic, ending)
-    text = email_service.adjust_text()
-    email_service.send_email(text, tot_nulls_before_after)
+# if __name__ == '__main__':
+    # start_date = ['2022-12-02']
+    # # list_of_sites = ['tarsus_tc1500_line2']
+    # list_of_sites = ['tarsus_tc1500_line2','veurne_tc300_line11', 'murcia_cip_gea', 'murcia_cip_tetra',
+    #                  'tarsus_pc50mz_line1', 'veurne_lopc21_line1', 'veurne_pc42_line4', 'veurne_pc50_line3',
+    #                  'zb_cip_blending', 'zb_cip_tankfarm']
+    # starts = start_date * len(list_of_sites)
+    # data_repo = r'C:\Users\HadarHolan\data_repo'
+    # tot_nulls_before_after = pd.DataFrame([])
+    # invalid_files_days = pd.DataFrame([])
+    # end_date = '2022-12-02'
+    # for j, site in enumerate(list_of_sites):
+    #     config_fp = f'C:\\Users\\hadarh\\OneDrive - Aqua Rimat\\Documents\\PycharmProjects\\tc_ml_pipeline\\' \
+    #                 f'site_and_email_config_files\\{site}_config.txt'
+    #     config_dict = io_utils.parse_config_dictionary_file(config_fp)
+    #     dates = pd.date_range(starts[j], end_date, freq='d')
+    #     for d in dates:
+    #         es_s3 = ES_to_S3(site, d, d + timedelta(seconds=86400 - 1), 'data_repo//tc_ml_pipeline', config_dict, True, True, True)
+    #         try:
+    #             null_statistics, invalid_input = es_s3.run()
+    #             tot_nulls_before_after = pd.concat([tot_nulls_before_after, null_statistics])
+    #             invalid_files_days = pd.concat([invalid_files_days, invalid_input])
+    #         except Exception as ex:
+    #             print(f'Day {d} was not ingested. Error is: {ex}')
+    #
+    # deployment_config_path = f'C:\\Users\\hadarh\\OneDrive - Aqua Rimat\\Documents\\PycharmProjects\\' \
+    #                          f'tc_ml_pipeline\\tc-predictor-service\\deploy_config.txt'
+    # config_deploy = io_utils.parse_config_dictionary_file(deployment_config_path)
+    # topic = 'null report per site before and after'
+    # ending = datetime.strptime(end_date, "%Y-%m-%d").date()
+    # email_service = EMailService(config_deploy['email']['sender'], config_deploy['email']['recipients'], topic, ending)
+    # text = email_service.adjust_text()
+    # email_service.send_email(text, tot_nulls_before_after)

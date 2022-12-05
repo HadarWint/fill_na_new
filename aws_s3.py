@@ -200,4 +200,3 @@ class AwsS3:
                 print(f'uploaded successfuly onto {key} in bucket {self.bucket}')
             except Exception as ex:
                 print(f'pdf  was not uploaded. Error is: {ex}')
-

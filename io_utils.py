@@ -228,6 +228,3 @@ def load_csv_file(input_path, index_col=False, dtype: Optional[DtypeArg] = None)
     data = pd.read_csv(input_path, index_col=index_col, dtype=dtype)
     print(f'...file loaded. shape =  {data.shape} \n')
     return data
-
-
-
